@@ -3,6 +3,7 @@ type NetString
 	size::Int
 	headers::Dict{String, String}
 	data::ASCIIString
+	content::ASCIIString
 
 	NetString(socket::TcpSocket) = new(socket, 0, Dict{String, String}(), "")
 end
@@ -48,6 +49,12 @@ function scgi(server, handler)
 end
 
 function handlefunc(ns::NetString)
+	read(ns.socket, Char)
+	ns.content = [read(ns.socket, Uint8) for i = 1:int(ns.headers["CONTENT_LENGTH"])]
+	#ns.content = readbytes(ns.socket, int(ns.headers["CONTENT_LENGTH"]))
+	println(ns.data)
+	println("----")
+	println(ns.content)
 	println(ns.socket, "Status: 200 OK")
 	println(ns.socket, "Content-Type: text/html")
 	println(ns.socket, "")
